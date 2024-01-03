@@ -24,12 +24,11 @@ preferencias_df = pd.read_sql('SELECT * FROM public.preferencias', con=engine)
 destino_df = pd.read_sql('SELECT * FROM public.destinos', con=engine)
 hoteles_df = pd.read_sql('SELECT * FROM public.hoteles', con=engine)
 
-
-################################# CRITERIOS DE PUNTUACIÓN #########################################
+#################################CRITERIOS DE PUNTUACIÓN#################################
 def calcular_puntaje(solicitudes_df):
     puntaje = 0
 
-    # Puntaje según la edad
+    # Puntuación según la edad
     if 65 <= solicitudes_df['edad'] <= 75:
         puntaje += 10
     elif 76 <= solicitudes_df['edad'] <= 85:
@@ -37,13 +36,13 @@ def calcular_puntaje(solicitudes_df):
     elif solicitudes_df['edad'] > 86:
         puntaje += 20
 
-    # Puntaje por estado civil
+    # Puntuación por estado civil
     puntaje += 10 if solicitudes_df['soltero_o_viudo'] else 0
 
-    # Puntaje por residencia en mayores
+    # Puntuación por vivir en residencia de mayores
     puntaje += 15 if solicitudes_df['vive_en_residencia'] else 0
 
-    # Puntaje por discapacidad
+    # Puntuación por discapacidad
     if 30 <= solicitudes_df['discapacidad'] <= 41:
         puntaje += 5
     elif 42 <= solicitudes_df['discapacidad'] <= 53:
@@ -55,10 +54,10 @@ def calcular_puntaje(solicitudes_df):
     elif solicitudes_df['discapacidad'] > 78:
         puntaje += 25
 
-    # Puntaje por acceso al transporte
+    # Puntuación por acceso a transporte
     puntaje += 1 if solicitudes_df['acceso_transporte'] else 5
 
-    # Puntaje por provincia
+    # Puntuación por provincia de residencia
     provincias_puntajes = {
         'alicante': 1,
         'castellón': 1,
@@ -117,8 +116,7 @@ def calcular_puntaje(solicitudes_df):
     }
     puntaje += provincias_puntajes.get(solicitudes_df['provincia_residente'].lower(), 0)
 
-
-    # Puntaje por año de viaje
+    # Puntuación por uso de servicio anteriormente
     if solicitudes_df['imserso_anopasado'] and solicitudes_df['imserso_2021']:
             puntaje += 1
     elif solicitudes_df['imserso_anopasado'] and not solicitudes_df['imserso_2021']:
@@ -128,7 +126,7 @@ def calcular_puntaje(solicitudes_df):
     else:
             puntaje += 25
 
-    # Puntaje por pensión
+    # Puntuación por pensión
     if 480 <= solicitudes_df['importe_pension'] <= 996:
         puntaje += 35
     elif 997 <= solicitudes_df['importe_pension'] <= 1513:
@@ -142,7 +140,7 @@ def calcular_puntaje(solicitudes_df):
 
     return puntaje
 
-# Aplicar la función calcular_puntaje a cada fila del DataFrame y agregar los resultados a una nueva tabla llamada 'puntuaciones'
+# Aplica la función "calcular_puntaje" a cada fila del DF y agrega los resultados a una nueva tabla llamada 'puntuaciones'
 puntuaciones_df = pd.DataFrame(solicitudes_df[['solicitud_id', 'nombre', 'apellidos']])
 puntuaciones_df['puntaje'] = solicitudes_df.apply(calcular_puntaje, axis=1)
 
@@ -158,7 +156,7 @@ try:
 
     cursor = connection.cursor()
 
-    # Insertar tabla 'puntuaciones'
+    # Inserta la tabla 'puntuaciones'
 
     for persona in puntuaciones_df.itertuples(index=False):
         insert_puntuaciones_query = """
@@ -173,8 +171,7 @@ try:
             persona.nombre,
             persona.apellidos,
             persona.puntaje
-        ))    
-
+        ))
 
     # Guarda los cambios en la base de datos
     connection.commit()
@@ -189,13 +186,11 @@ finally:
     if 'cursor' in locals():
         cursor.close()
 
-
-
 ################################# ASIGNACIÓN DE HOTELES #########################################
-# Ordenar el DataFrame por la columna 'puntaje' de mayor a menos
+# Ordenar el DF por la columna 'puntaje' de mayor a menor
 puntuaciones_df = puntuaciones_df.sort_values(by='puntaje', ascending=False)
 
-# Funcion para asignar los hoteles
+# Función para asignar los hoteles
 def asignar_hoteles(puntuaciones_df, hoteles_df, preferencias_df, primer_recorrido=True):
    
    # Agrupar hoteles por ciudad para contar las plazas
