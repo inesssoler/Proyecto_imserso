@@ -193,11 +193,8 @@ puntuaciones_df = puntuaciones_df.sort_values(by='puntaje', ascending=False)
 # Define la función para asignar los hoteles
 def asignar_hoteles(puntuaciones_df, hoteles_df, preferencias_df, primer_recorrido=True):
    
-   # Agrupa los hoteles por ciudad para contar las plazas
+    # Agrupa los hoteles por ciudad para contar las plazas
     total_plazas_por_provincia = hoteles_df.groupby('ciudad')['plazas'].sum().reset_index()
-
-    #puntuaciones_df['hotel_asignado_1'] = None
-    #puntuaciones_df['hotel_asignado_2'] = None
 
     for index, persona in preferencias_df.iterrows():
         # Obtiene las preferencias de la persona
@@ -207,8 +204,8 @@ def asignar_hoteles(puntuaciones_df, hoteles_df, preferencias_df, primer_recorri
 
         # Verifica si ya se le asignó un hotel en el primer recorrido
         asignado_en_primer_recorrido = (
-            not puntuaciones_df[f'hotel_asignado_1'].isnull().iloc[index] or
-            not puntuaciones_df[f'hotel_asignado_2'].isnull().iloc[index]
+            not puntuaciones_df['hotel_asignado_1'].isnull().iloc[index] or
+            not puntuaciones_df['hotel_asignado_2'].isnull().iloc[index]
         )
 
         # Si no se le asignó en el primer recorrido, establece nuevas preferencias
@@ -228,7 +225,7 @@ def asignar_hoteles(puntuaciones_df, hoteles_df, preferencias_df, primer_recorri
                 # Excluye hoteles que ya hayan sido asignados a ese viajero
                 hoteles_disponibles = hoteles_disponibles[~hoteles_disponibles['hotel'].isin(hoteles_asignados)]
 
-                for _ in range(2):  # Intenta asignar hasta dos hoteles
+                for i in range(2):  # Intenta asignar hasta dos hoteles
                     if not hoteles_disponibles.empty and len(hoteles_asignados) < 2:
                         # Selecciona el hotel con más plazas disponibles y asigna según el puntaje
                         hotel_asignado = hoteles_disponibles.loc[hoteles_disponibles['plazas'].idxmax()]
@@ -239,7 +236,7 @@ def asignar_hoteles(puntuaciones_df, hoteles_df, preferencias_df, primer_recorri
 
                         # Asigna hotel en el DF 'puntuaciones'
                         if (puntuaciones_df['solicitud_id'] == persona['solicitud_id']).any():
-                            column_name = f'hotel_asignado_{_ + 1}' if primer_recorrido else f'hotel_asignado_{_ + 3}'
+                            column_name = f'hotel_asignado_{i + 1}' if primer_recorrido else f'hotel_asignado_{i + 3}'
                             puntuaciones_df.at[index, column_name] = hotel_asignado['hotel']
 
                         # Elimina el hotel asignado de la lista de disponibles
@@ -256,7 +253,6 @@ def asignar_hoteles(puntuaciones_df, hoteles_df, preferencias_df, primer_recorri
 
     # Si es el primer recorrido, realiza un segundo recorrido
     if primer_recorrido:
-        
         puntuaciones_df_copia = puntuaciones_df.copy(deep=True)
         hoteles_df_copia = hoteles_df.copy(deep=True)
 
@@ -273,6 +269,7 @@ def asignar_hoteles(puntuaciones_df, hoteles_df, preferencias_df, primer_recorri
 resultado = asignar_hoteles(puntuaciones_df, hoteles_df, preferencias_df)
 print(f'Dataframe puntuaciones: {resultado}')
 print(f'Dataframe puntuaciones: {puntuaciones_df}')
+
 #print(f'puntuaciones def: {solicitudes_df}')
 
 # CONEXION E INSERCIÓN DE LOS DATOS A LA TABAL 'PUNTUACIONES'
