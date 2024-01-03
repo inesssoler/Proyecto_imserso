@@ -57,3 +57,50 @@ Y finalmente, hemos obtenido los datos de los hoteles que actualmente participan
 
 # Variables incluidas en el Sistema de Puntuaciones
 
+# Modelo de datos
+Tabla Solicitudes
+solicitud_id (clave primaria)
+nombre
+apellidos
+edad
+provincia_residente
+telefono
+discapacidad
+seguridad_social
+soltero_o_viudo
+vive_en_residencia
+viajara_con_acompanante
+acceso_transporte
+imserso_anopasado
+imserso_2021
+importe_pension
+porcentaje_discapacidad
+Tabla Destinos
+tipo_destino_id (clave primaria)
+tipo_destino
+duracion
+Tabla Ciudades
+ciudades_id (clave primaria)
+ciudad
+tipo_destino_id (clave foránea referenciando a la tabla Destinos)
+Tabla Preferencias
+preferencias_id (clave primaria)
+opcion_1
+opcion_2
+opcion_3
+opcion_4
+opcion_5
+opcion_id_1 (clave foránea referenciando a la tabla Ciudades)
+opcion_id_2 (clave foránea referenciando a la tabla Ciudades)
+opcion_id_3 (clave foránea referenciando a la tabla Ciudades)
+opcion_id_4 (clave foránea referenciando a la tabla Ciudades)
+opcion_id_5 (clave foránea referenciando a la tabla Ciudades)
+solicitud_id (clave foránea referenciando a la tabla Solicitudes)
+Tabla Hoteles
+hotel_id (clave primaria)
+hotel
+plazas
+ciudad
+ciudades_id (clave foránea referenciando a la tabla Ciudades)
+Este modelo refleja la estructura de las tablas y las relaciones entre ellas. La información se organiza de manera que puedes relacionar las preferencias con las ciudades, las ciudades con los destinos, y los hoteles con las ciudades. Además, las solicitudes están relacionadas con las preferencias. Cada tabla tiene una clave primaria única, y las claves foráneas se utilizan para establecer relaciones entre las tablas.
+
