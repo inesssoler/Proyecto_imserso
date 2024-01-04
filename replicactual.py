@@ -127,15 +127,18 @@ puntuaciones_df = puntuaciones_df.sort_values(by='puntaje', ascending=False)
 
 # Funcion para asignar los hoteles
 def asignar_hoteles(puntuaciones_df, hoteles_df, preferencias_df, primer_recorrido=True):
+
     # Agrupar hoteles por ciudad para contar las plazas
     total_plazas_por_provincia = hoteles_df.groupby('ciudad')['plazas'].sum().reset_index()
 
-    for index, persona in preferencias_df.iterrows():
+    # Ordenar el DataFrame por la columna 'puntaje' de mayor a menos
+    puntuaciones_df = puntuaciones_df.sort_values(by='puntaje', ascending=False)
+
+    for index, persona in puntuaciones_df.iterrows():
         # Obtener las preferencias de la persona
-        preferencias = persona[['opcion_1', 'opcion_2', 'opcion_3', 'opcion_4', 'opcion_5']]
+        preferencias = preferencias_df[preferencias_df['solicitud_id'] == persona['solicitud_id']][['opcion_1', 'opcion_2', 'opcion_3', 'opcion_4', 'opcion_5']].values.flatten()
 
         hoteles_asignados = []
-        hoteles_disponibles = pd.DataFrame()  # Inicializar como DataFrame vacío
 
         for preferencia in preferencias:
             # Verificar si hay plazas disponibles en la ciudad de la preferencia
@@ -157,8 +160,7 @@ def asignar_hoteles(puntuaciones_df, hoteles_df, preferencias_df, primer_recorri
                         hoteles_df.loc[hoteles_df['hotel_id'] == hotel_asignado['hotel_id'], 'plazas'] -= plazas_a_restar
 
                         # Asignar hotel en el dataframe 'puntuaciones'
-                        if (puntuaciones_df['solicitud_id'] == persona['solicitud_id']).any():
-                            puntuaciones_df.at[index, f'hotel_asignado_{_ + 1}'] = hotel_asignado['hotel']
+                        puntuaciones_df.at[index, f'hotel_asignado_{_ + 1}'] = hotel_asignado['hotel']
 
                         # Eliminar el hotel asignado de la lista de disponibles
                         hoteles_disponibles = hoteles_disponibles[~(hoteles_disponibles['hotel_id'] == hotel_asignado['hotel_id'])]
@@ -169,33 +171,6 @@ def asignar_hoteles(puntuaciones_df, hoteles_df, preferencias_df, primer_recorri
                         hoteles_asignados.append(hotel_asignado['hotel'])
                     else:
                         break  # Salir si no hay más hoteles disponibles
-
-        # Si no se asignaron hoteles y es el primer recorrido, intentar asignar basándose en ciudades con plazas disponibles
-        if len(hoteles_asignados) == 0 and primer_recorrido:
-            ciudades_disponibles = total_plazas_por_provincia[total_plazas_por_provincia['plazas'] > 0]['ciudad'].tolist()
-            for ciudad in ciudades_disponibles:
-                hoteles_disponibles_ciudad = hoteles_df[(hoteles_df['ciudad'] == ciudad) & (hoteles_df['plazas'] > 0)]
-
-                for _ in range(2):  # Intentar asignar hasta dos hoteles
-                    if not hoteles_disponibles_ciudad.empty:
-                        # Seleccionar el hotel con más plazas disponibles y asignar según el puntaje
-                        hotel_asignado = hoteles_disponibles_ciudad.loc[hoteles_disponibles_ciudad['plazas'].idxmax()]
-
-                        # Actualizar las plazas disponibles del hotel y ciudad
-                        plazas_a_restar = 2 if solicitudes_df['viajara_con_acompanante'].iloc[index] else 1
-                        hoteles_df.loc[hoteles_df['hotel_id'] == hotel_asignado['hotel_id'], 'plazas'] -= plazas_a_restar
-
-                        # Asignar hotel en el dataframe 'puntuaciones'
-                        if (puntuaciones_df['solicitud_id'] == persona['solicitud_id']).any():
-                            puntuaciones_df.at[index, f'hotel_asignado_{_ + 1}'] = hotel_asignado['hotel']
-
-                        # Eliminar el hotel asignado de la lista de disponibles
-                        hoteles_disponibles_ciudad = hoteles_disponibles_ciudad[~(hoteles_disponibles_ciudad['hotel_id'] == hotel_asignado['hotel_id'])]
-                        # Actualizar plazas disponibles en total_plazas_por_ciudad
-                        total_plazas_por_provincia.loc[total_plazas_por_provincia['ciudad'] == ciudad, 'plazas'] -= plazas_a_restar
-
-                    else:
-                        break
 
     # Si es el primer recorrido, realizar un segundo recorrido
     if primer_recorrido:
@@ -211,13 +186,10 @@ def asignar_hoteles(puntuaciones_df, hoteles_df, preferencias_df, primer_recorri
 
     return puntuaciones_df
 
-
-
 # Llamar a la función asignar_hoteles
 resultado = asignar_hoteles(puntuaciones_df, hoteles_df, preferencias_df)
 print(f'Dataframe puntuaciones: {resultado}')
 print(f'Dataframe puntuaciones: {puntuaciones_df}')
-#print(f'puntuaciones def: {solicitudes_df}')
 
 
 # CONEXION E INSERCIÓN DE LOS DATOS A LA TABAL 'PUNTUACIONES'
