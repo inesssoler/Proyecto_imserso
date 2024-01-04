@@ -102,7 +102,7 @@ CREATE TABLE public.asignaciones
     puntaje smallint,
     hotel_asignado_1 varchar(150),
     hotel_asignado_2 varchar(150),
-    FOREIGN KEY (solicitud_id) REFERENCES solicitudes(solicitud_id)
+    FOREIGN KEY (solicitud_id) REFERENCES solicitudes(solicitud_id),
     FOREIGN KEY (puntaje) REFERENCES puntuaciones(puntaje)
 );
 
