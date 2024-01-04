@@ -6,7 +6,10 @@ import pandas as pd
 import psycopg2
 from sqlalchemy import create_engine, text 
 from config import config
+import time
 
+# Para darle tiempo al contenedor de postgres para levantarse por completo antes de ejecutar el script
+time.sleep(10)
 
 # Adapta la librería 'Faker' al español castellano con nombres en dicho idioma
 fake = Faker('es_ES')
