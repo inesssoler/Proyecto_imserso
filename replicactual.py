@@ -2,146 +2,73 @@ import pandas as pd
 import numpy as np
 import psycopg2
 from faker import Faker
-from sqlalchemy import create_engine, text
+from sqlalchemy import create_engine
 from config import config
-import time
 
+# Conexión a la base de datos
+'''
+connection_params = {
+    'dbname': config['database'],
+    'user': config['user'],
+    'password': config['password],
+    'host': 'localhost',
+    'port': '5432'
+}
+'''
 
-# Para darle tiempo al contenedor de postgres para levantarse por completo antes de ejecutar el script
-time.sleep(10)
-
-# Conexión 
 engine = create_engine(f"postgresql+psycopg2://{config['user']}:{config['password']}@{config['host']}:{config['port']}/{config['database']}")
 
-conn = engine.connect()
-query_solicitudes = text('SELECT * FROM public.solicitudes')
-query_ciudades = text('SELECT * FROM public.ciudades')
-query_preferencias = text('SELECT * FROM public.preferencias')
-query_destino = text('SELECT * FROM public.destinos')
-query_hoteles = text('SELECT * FROM public.hoteles')
+solicitudes_df = pd.read_sql('SELECT * FROM public.solicitudes', con=engine)
+ciudades_df = pd.read_sql('SELECT * FROM public.ciudades', con=engine)
+preferencias_df = pd.read_sql('SELECT * FROM public.preferencias', con=engine)
+destino_df = pd.read_sql('SELECT * FROM public.destinos', con=engine)
+hoteles_df = pd.read_sql('SELECT * FROM public.hoteles', con=engine)
 
-solicitudes_df = pd.read_sql(query_solicitudes, con=conn)
-ciudades_df = pd.read_sql(query_ciudades, con=conn)
-preferencias_df = pd.read_sql(query_preferencias, con=conn)
-destino_df = pd.read_sql(query_destino, con=conn)
-hoteles_df = pd.read_sql(query_hoteles, con=conn)
 
-conn.close()
-
-################################# CRITERIOS DE PUNTUACIÓN #########################################
+################################# CRITERIOS DE PUNTUACIÓN #################################
 def calcular_puntaje(solicitudes_df):
     puntaje = 0
 
-    # Puntaje según la edad
-    if 65 <= solicitudes_df['edad'] <= 75:
-        puntaje += 10
-    elif 76 <= solicitudes_df['edad'] <= 85:
-        puntaje += 15
-    elif solicitudes_df['edad'] > 86:
-        puntaje += 20
-
-    # Puntaje por estado civil
-    puntaje += 10 if solicitudes_df['soltero_o_viudo'] else 0
-
-    # Puntaje por residencia en mayores
-    puntaje += 15 if solicitudes_df['vive_en_residencia'] else 0
-
-    # Puntaje por discapacidad
-    if 30 <= solicitudes_df['discapacidad'] <= 41:
-        puntaje += 5
-    elif 42 <= solicitudes_df['discapacidad'] <= 53:
-        puntaje += 10
-    elif 54 <= solicitudes_df['discapacidad'] <= 65:
-        puntaje += 15
-    elif 66 <= solicitudes_df['discapacidad'] <= 77:
-        puntaje += 20
-    elif solicitudes_df['discapacidad'] > 78:
-        puntaje += 25
-
-    # Puntaje por acceso al transporte
-    puntaje += 1 if solicitudes_df['acceso_transporte'] else 5
-
-    # Puntaje por provincia
-    provincias_puntajes = {
-        'alicante': 1,
-        'castellón': 1,
-        'valencia': 1,
-        'murcia': 1,
-        'almería': 1,
-        'granada': 1,
-        'huelva': 1,
-        'sevilla': 1,
-        'córdoba': 1,
-        'jaén': 1,
-        'málaga': 1,
-        'cádiz': 1,
-        'girona': 2,
-        'barcelona': 2,
-        'tarragona': 2,
-        'lleida': 2,
-        'ourense': 2,
-        'lugo': 2,
-        'pontevedra': 2,
-        'a coruña': 2,
-        'asturias': 2,
-        'bilbao': 2,
-        'álava': 2,
-        'vizcaya': 2,
-        'guipúzcoa': 2,
-        'albacete': 3,
-        'ciudad real': 3,
-        'cuenca': 3,
-        'guadalajara': 3,
-        'toledo': 3,
-        'badajoz': 3,
-        'cáceres': 3,
-        'madrid': 4,
-        'huesca': 5,
-        'zaragoza': 5,
-        'teruel': 5,
-        'la rioja': 5,
-        'navarra': 5,
-        'pamplona': 5,
-        'cantabria': 5,
-        'burgos': 6,
-        'león': 6,
-        'palencia': 6,
-        'zamora': 6,
-        'valladolid': 6,
-        'soria': 6,
-        'segovia': 6,
-        'ávila': 6,
-        'salamanca': 6,
-        'baleares': 7,
-        'las palmas': 7,
-        'santa cruz de tenerife': 7,
-        'ceuta': 7,
-        'melilla': 7
-    }
-    puntaje += provincias_puntajes.get(solicitudes_df['provincia_residente'].lower(), 0)
-
-
-    # Puntaje por año de viaje
-    if solicitudes_df['imserso_anopasado'] and solicitudes_df['imserso_2021']:
-            puntaje += 1
-    elif solicitudes_df['imserso_anopasado'] and not solicitudes_df['imserso_2021']:
-            puntaje += 5
-    elif not solicitudes_df['imserso_anopasado'] and solicitudes_df['imserso_2021']:
-            puntaje += 10
-    else:
-            puntaje += 25
-
-    # Puntaje por pensión
-    if 480 <= solicitudes_df['importe_pension'] <= 996:
-        puntaje += 35
-    elif 997 <= solicitudes_df['importe_pension'] <= 1513:
-        puntaje += 20
-    elif 1514 <= solicitudes_df['importe_pension'] <= 2030:
-        puntaje += 10
-    elif 2031 <= solicitudes_df['importe_pension'] <= 2547:
-        puntaje += 5
-    elif solicitudes_df['importe_pension'] > 2548:
+    # Puntuación según la edad
+    if solicitudes_df['edad'] < 60:
         puntaje += 1
+    elif 60 <= solicitudes_df['edad'] <= 78:
+        puntaje += solicitudes_df['edad'] - 58
+    else:
+        puntaje += 20
+
+    # Puntuación por discapacidad
+    if solicitudes_df['discapacidad'] >= 33:
+        puntaje += 10
+
+    # Puntuación por situación económica
+    tramos_ingresos = [
+        (0, 484.61, 50),
+        (484.61, 900, 45),
+        (900, 1050, 40),
+        (1050, 1200, 35),
+        (1200, 1350, 30),
+        (1350, 1500, 25),
+        (1500, 1650, 20),
+        (1650, 1800, 15),
+        (1800, 1950, 10),
+        (1950, 2100, 5),
+        (2100, np.inf, 0)
+    ]
+    for tramo in tramos_ingresos:
+        if tramo[0] <= solicitudes_df['importe_pension'] <= tramo[1]:
+            puntaje += tramo[2]
+            break
+
+    # Puntuación por participación en años anteriores
+    if solicitudes_df['imserso_anopasado'] and solicitudes_df['imserso_2021']:
+        puntaje += 0
+    elif solicitudes_df['imserso_anopasado'] and not solicitudes_df['imserso_2021']:
+        puntaje += 5
+    elif not solicitudes_df['imserso_anopasado'] and solicitudes_df['imserso_2021']:
+        puntaje += 10
+    else:
+        puntaje += 25
 
     return puntaje
 
@@ -182,8 +109,7 @@ try:
     # Guarda los cambios en la base de datos
     connection.commit()
 
-    query_puntuaciones = text('SELECT * FROM public.puntuaciones')
-    puntuaciones_df = pd.read_sql(query_puntuaciones, con=engine)
+    puntuaciones_df = pd.read_sql('SELECT * FROM public.puntuaciones', con=engine)
 
 except Exception as e:
     print(f"Error: {e}")
@@ -196,9 +122,7 @@ finally:
 
 
 ################################# ASIGNACIÓN DE HOTELES #########################################
-
-# Ordenar el DataFrame por la columna 'puntaje' de mayor a menor
-
+# Ordenar el DataFrame por la columna 'puntaje' de mayor a menos
 puntuaciones_df = puntuaciones_df.sort_values(by='puntaje', ascending=False)
 
 # Funcion para asignar los hoteles
@@ -213,7 +137,6 @@ def asignar_hoteles(puntuaciones_df, hoteles_df, preferencias_df, primer_recorri
     for index, persona in puntuaciones_df.iterrows():
         # Obtener las preferencias de la persona
         preferencias = preferencias_df[preferencias_df['solicitud_id'] == persona['solicitud_id']][['opcion_1', 'opcion_2', 'opcion_3', 'opcion_4', 'opcion_5']].values.flatten()
-
 
         hoteles_asignados = []
 
@@ -263,12 +186,13 @@ def asignar_hoteles(puntuaciones_df, hoteles_df, preferencias_df, primer_recorri
 
     return puntuaciones_df
 
-
 # Llamar a la función asignar_hoteles
 resultado = asignar_hoteles(puntuaciones_df, hoteles_df, preferencias_df)
+print(f'Dataframe puntuaciones: {resultado}')
+print(f'Dataframe puntuaciones: {puntuaciones_df}')
 
 
-# CONEXION E INSERCIÓN DE LOS DATOS A LA TABLA 'PUNTUACIONES'
+# CONEXION E INSERCIÓN DE LOS DATOS A LA TABAL 'PUNTUACIONES'
 
 try:
     connection = psycopg2.connect(
@@ -311,7 +235,3 @@ finally:
     # Cierra el cursor y la conexión
     if 'cursor' in locals():
         cursor.close()
-    if 'connection' in locals():
-        connection.close()
-
-

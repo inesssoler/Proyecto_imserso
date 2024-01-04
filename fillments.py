@@ -15,7 +15,7 @@ time.sleep(10)
 fake = Faker('es_ES')
 
 # Cantidad de solicitantes a generar
-num_registros = 1000
+num_registros = 2000
 
 base_de_datos = []
 
@@ -116,7 +116,7 @@ ciudades_df['ciudades_id'] = ciudades_df.index
 # TABLA PREFERENCIAS
 
 personas = []
-for i in range(1, 1001):
+for i in range(1, num_registros +1):
     preferencias_id = i
     ciudades_indices = random.sample(ciudades_df.index.tolist(), 5)
     ciudades_nombres = [ciudades_df.loc[idx, 'ciudad'] for idx in ciudades_indices]
@@ -202,7 +202,7 @@ hoteles_df = pd.DataFrame()
 hoteles_df['hotel'] = hoteles
 hoteles_df['ciudad'] = lista_ciudades
 hoteles_df['hotel_id'] = hoteles_df.index
-hoteles_df['plazas'] = random.randint(130, 220)
+hoteles_df['plazas'] = random.randint(20, 30)
 
 hoteles_df['ciudades_id'] = 0  # Inicializa la columna ciudades_id
 
