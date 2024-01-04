@@ -119,7 +119,9 @@ Para el sistema de puntuaciones, se han seleccionado las variables más relevant
 
 
 ># Modelo de datos
->>> Poner esquema relacional de SQL
+
+![Esquema Relacional de las Tablas](esquema_relacional.png)
+
 
 Tabla Solicitudes
 solicitud_id (clave primaria)
