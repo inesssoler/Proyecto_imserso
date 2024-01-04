@@ -1,11 +1,13 @@
-> # **Data Project 1**
+# **Data Project 1**
 Este repositorio contiene toda la información del primer Data Project grupal del máster. El grupo está compuesto por Balma Agost, Borja Cabo, Javier Ruíz, Luis Segura e Inés Soler.
 
-# Objetivos
+
+># Objetivos
 El objetivo principal del proyecto es modernizar y hacer más justo el proceso de asignación de las plazas de hoteles ofrecidas por el Imserso. 
 Para ello, hemos creado un sistema de puntuaciones basado en distintas variables que asignan mayor o menor preferencia a cada individuo a la hora de elegir plaza.
 
-# Datos Utilizados
+
+># Datos Utilizados
 A continuación se pueden ver todos los datos que hemos utilizado y sus características.
 
 | TABLA | VARIABLE | DESCRIPCIÓN | TIPO DE DATO | 
@@ -47,9 +49,28 @@ A continuación se pueden ver todos los datos que hemos utilizado y sus caracter
 | Hoteles | ciudades_id | ID de la ciudad donde está situado el hotel. Unión con la tabla 'ciudades'. | bigint |
 
 
+Al aplicar los puntajes, se genera otra tabla que contiene las siguientes columnas:
+
+| TABLA | VARIABLE | DESCRIPCIÓN | TIPO DE DATO | 
+| ----- | -------- | ----------- | ------------ | 
+| Puntuaciones | solicitud_id | ID del solicitante. Unión con la tablas 'solicitudes' | bigint |
+| Puntuaciones | nombre | Nombre de cada solicitante. | varchar(50) |
+| Puntuaciones | apellidos | Apellidos de cada solicitante. | varchar(60) |
+| Puntuaciones | puntaje | Puntaje individual según las características del solicitante. | smallint |
 
 
-# Origen de los Datos
+Una vez definidos los putajes para cada solicitante, podemos crear otra tabla en la que se muestran los hoteles que se han asignado a cada solicitante. La tabla contiene los siguientes campos:
+| TABLA | VARIABLE | DESCRIPCIÓN | TIPO DE DATO | 
+| ----- | -------- | ----------- | ------------ | 
+| Asignaciones | solicitud_id | ID del solicitante. Unión con la tablas 'solicitudes' | bigint |
+| Asignaciones | nombre | Nombre de cada solicitante. | varchar(50) |
+| Asignaciones | apellidos | Apellidos de cada solicitante. | varchar(60) |
+| Asignaciones | puntaje | Puntaje individual según las características del solicitante. | smallint |
+| Asignaciones | hotel_asignado_1 | Nombre del primer hotel que se le ha asignado al solicitante. | varchar(150) |
+| Asignaciones | hotel_asignado_2 | Nombre del segundo hotel que se le ha asignado al solicitante. | varchar(150) |
+
+
+># Origen de los Datos
 Los datos han sido creados mayoritariamente de forma aleatoria haciendo uso de la librería 'faker' y del módulo 'random' de Python.
 De los datos creados aleatoriamente, los siguientes han sido delimitados basándonos en información real:
 - La edad solo puede estar en el rango de 60 a 99 años.
@@ -61,7 +82,8 @@ Por otra parte, los datos referentes a los diferentes tipos de destino y las pos
 
 Y finalmente, hemos obtenido los datos de los hoteles que actualmente participan en el programa del IMSERSO: [Lista de Hoteles](https://www.preferente.com/noticias-de-hoteles/imserso-lista-completa-de-los-235-hoteles-de-mundiplan-y-turismo-social-321200.html)
 
-# Variables incluidas en el Sistema de Puntuaciones
+
+># Variables incluidas en el Sistema de Puntuaciones
 Para el sistema de puntuaciones, se han seleccionado las variables más relevantes, bajo nuestro punto de vista, y a cada una se le ha asignado un puntaje dependiendo del valor que tome para cada solicitante.
 
 | VARIABLE | VALORES | PUNTOS | 
@@ -96,8 +118,9 @@ Para el sistema de puntuaciones, se han seleccionado las variables más relevant
 |                      | Ninguno | 25 puntos |
 
 
-# Modelo de datos
+># Modelo de datos
 >>> Poner esquema relacional de SQL
+
 Tabla Solicitudes
 solicitud_id (clave primaria)
 nombre
