@@ -5,16 +5,7 @@ from faker import Faker
 from sqlalchemy import create_engine
 from config import config
 
-# Conexión a la base de datos
-'''
-connection_params = {
-    'dbname': config['database'],
-    'user': config['user'],
-    'password': config['password],
-    'host': 'localhost',
-    'port': '5432'
-}
-'''
+# Conexión 
 
 engine = create_engine(f"postgresql+psycopg2://{config['user']}:{config['password']}@{config['host']}:{config['port']}/{config['database']}")
 
@@ -24,7 +15,8 @@ preferencias_df = pd.read_sql('SELECT * FROM public.preferencias', con=engine)
 destino_df = pd.read_sql('SELECT * FROM public.destinos', con=engine)
 hoteles_df = pd.read_sql('SELECT * FROM public.hoteles', con=engine)
 
-#################################CRITERIOS DE PUNTUACIÓN#################################
+
+################################# CRITERIOS DE PUNTUACIÓN #################################
 def calcular_puntaje(solicitudes_df):
     puntaje = 0
 
@@ -144,7 +136,7 @@ def calcular_puntaje(solicitudes_df):
 puntuaciones_df = pd.DataFrame(solicitudes_df[['solicitud_id', 'nombre', 'apellidos']])
 puntuaciones_df['puntaje'] = solicitudes_df.apply(calcular_puntaje, axis=1)
 
-# CONEXION E INSERCIÓN DE LOS DATOS A LA TABAL 'PUNTUACIONES'
+# CONEXION E INSERCIÓN DE LOS DATOS A LA TABLA 'PUNTUACIONES'
 
 try:
     connection = psycopg2.connect(
@@ -314,3 +306,5 @@ finally:
     # Cierra el cursor y la conexión
     if 'cursor' in locals():
         cursor.close()
+    if 'connection' in locals():
+        connection.close()
