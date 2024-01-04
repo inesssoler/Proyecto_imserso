@@ -2,28 +2,31 @@ import pandas as pd
 import numpy as np
 import psycopg2
 from faker import Faker
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 from config import config
+import time
 
-# Conexión a la base de datos
-'''
-connection_params = {
-    'dbname': config['database'],
-    'user': config['user'],
-    'password': config['password],
-    'host': 'localhost',
-    'port': '5432'
-}
-'''
 
+# Para darle tiempo al contenedor de postgres para levantarse por completo antes de ejecutar el script
+time.sleep(10)
+
+# Conexión 
 engine = create_engine(f"postgresql+psycopg2://{config['user']}:{config['password']}@{config['host']}:{config['port']}/{config['database']}")
 
-solicitudes_df = pd.read_sql('SELECT * FROM public.solicitudes', con=engine)
-ciudades_df = pd.read_sql('SELECT * FROM public.ciudades', con=engine)
-preferencias_df = pd.read_sql('SELECT * FROM public.preferencias', con=engine)
-destino_df = pd.read_sql('SELECT * FROM public.destinos', con=engine)
-hoteles_df = pd.read_sql('SELECT * FROM public.hoteles', con=engine)
+conn = engine.connect()
+query_solicitudes = text('SELECT * FROM public.solicitudes')
+query_ciudades = text('SELECT * FROM public.ciudades')
+query_preferencias = text('SELECT * FROM public.preferencias')
+query_destino = text('SELECT * FROM public.destinos')
+query_hoteles = text('SELECT * FROM public.hoteles')
 
+solicitudes_df = pd.read_sql(query_solicitudes, con=conn)
+ciudades_df = pd.read_sql(query_ciudades, con=conn)
+preferencias_df = pd.read_sql(query_preferencias, con=conn)
+destino_df = pd.read_sql(query_destino, con=conn)
+hoteles_df = pd.read_sql(query_hoteles, con=conn)
+
+conn.close()
 
 ################################# CRITERIOS DE PUNTUACIÓN #########################################
 def calcular_puntaje(solicitudes_df):
@@ -179,7 +182,8 @@ try:
     # Guarda los cambios en la base de datos
     connection.commit()
 
-    puntuaciones_df = pd.read_sql('SELECT * FROM public.puntuaciones', con=engine)
+    query_puntuaciones = text('SELECT * FROM public.puntuaciones')
+    puntuaciones_df = pd.read_sql(query_puntuaciones, con=engine)
 
 except Exception as e:
     print(f"Error: {e}")
@@ -192,7 +196,9 @@ finally:
 
 
 ################################# ASIGNACIÓN DE HOTELES #########################################
-# Ordenar el DataFrame por la columna 'puntaje' de mayor a menos
+
+# Ordenar el DataFrame por la columna 'puntaje' de mayor a menor
+
 puntuaciones_df = puntuaciones_df.sort_values(by='puntaje', ascending=False)
 
 # Funcion para asignar los hoteles
@@ -207,6 +213,7 @@ def asignar_hoteles(puntuaciones_df, hoteles_df, preferencias_df, primer_recorri
     for index, persona in puntuaciones_df.iterrows():
         # Obtener las preferencias de la persona
         preferencias = preferencias_df[preferencias_df['solicitud_id'] == persona['solicitud_id']][['opcion_1', 'opcion_2', 'opcion_3', 'opcion_4', 'opcion_5']].values.flatten()
+
 
         hoteles_asignados = []
 
@@ -256,13 +263,12 @@ def asignar_hoteles(puntuaciones_df, hoteles_df, preferencias_df, primer_recorri
 
     return puntuaciones_df
 
+
 # Llamar a la función asignar_hoteles
 resultado = asignar_hoteles(puntuaciones_df, hoteles_df, preferencias_df)
-print(f'Dataframe puntuaciones: {resultado}')
-print(f'Dataframe puntuaciones: {puntuaciones_df}')
 
 
-# CONEXION E INSERCIÓN DE LOS DATOS A LA TABAL 'PUNTUACIONES'
+# CONEXION E INSERCIÓN DE LOS DATOS A LA TABLA 'PUNTUACIONES'
 
 try:
     connection = psycopg2.connect(
@@ -305,3 +311,7 @@ finally:
     # Cierra el cursor y la conexión
     if 'cursor' in locals():
         cursor.close()
+    if 'connection' in locals():
+        connection.close()
+
+
