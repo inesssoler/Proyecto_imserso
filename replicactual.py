@@ -25,120 +25,50 @@ destino_df = pd.read_sql('SELECT * FROM public.destinos', con=engine)
 hoteles_df = pd.read_sql('SELECT * FROM public.hoteles', con=engine)
 
 
-################################# CRITERIOS DE PUNTUACIÓN #########################################
+################################# CRITERIOS DE PUNTUACIÓN #################################
 def calcular_puntaje(solicitudes_df):
     puntaje = 0
 
-    # Puntaje según la edad
-    if 65 <= solicitudes_df['edad'] <= 75:
-        puntaje += 10
-    elif 76 <= solicitudes_df['edad'] <= 85:
-        puntaje += 15
-    elif solicitudes_df['edad'] > 86:
-        puntaje += 20
-
-    # Puntaje por estado civil
-    puntaje += 10 if solicitudes_df['soltero_o_viudo'] else 0
-
-    # Puntaje por residencia en mayores
-    puntaje += 15 if solicitudes_df['vive_en_residencia'] else 0
-
-    # Puntaje por discapacidad
-    if 30 <= solicitudes_df['discapacidad'] <= 41:
-        puntaje += 5
-    elif 42 <= solicitudes_df['discapacidad'] <= 53:
-        puntaje += 10
-    elif 54 <= solicitudes_df['discapacidad'] <= 65:
-        puntaje += 15
-    elif 66 <= solicitudes_df['discapacidad'] <= 77:
-        puntaje += 20
-    elif solicitudes_df['discapacidad'] > 78:
-        puntaje += 25
-
-    # Puntaje por acceso al transporte
-    puntaje += 1 if solicitudes_df['acceso_transporte'] else 5
-
-    # Puntaje por provincia
-    provincias_puntajes = {
-        'alicante': 1,
-        'castellón': 1,
-        'valencia': 1,
-        'murcia': 1,
-        'almería': 1,
-        'granada': 1,
-        'huelva': 1,
-        'sevilla': 1,
-        'córdoba': 1,
-        'jaén': 1,
-        'málaga': 1,
-        'cádiz': 1,
-        'girona': 2,
-        'barcelona': 2,
-        'tarragona': 2,
-        'lleida': 2,
-        'ourense': 2,
-        'lugo': 2,
-        'pontevedra': 2,
-        'a coruña': 2,
-        'asturias': 2,
-        'bilbao': 2,
-        'álava': 2,
-        'vizcaya': 2,
-        'guipúzcoa': 2,
-        'albacete': 3,
-        'ciudad real': 3,
-        'cuenca': 3,
-        'guadalajara': 3,
-        'toledo': 3,
-        'badajoz': 3,
-        'cáceres': 3,
-        'madrid': 4,
-        'huesca': 5,
-        'zaragoza': 5,
-        'teruel': 5,
-        'la rioja': 5,
-        'navarra': 5,
-        'pamplona': 5,
-        'cantabria': 5,
-        'burgos': 6,
-        'león': 6,
-        'palencia': 6,
-        'zamora': 6,
-        'valladolid': 6,
-        'soria': 6,
-        'segovia': 6,
-        'ávila': 6,
-        'salamanca': 6,
-        'baleares': 7,
-        'las palmas': 7,
-        'santa cruz de tenerife': 7,
-        'ceuta': 7,
-        'melilla': 7
-    }
-    puntaje += provincias_puntajes.get(solicitudes_df['provincia_residente'].lower(), 0)
-
-
-    # Puntaje por año de viaje
-    if solicitudes_df['imserso_anopasado'] and solicitudes_df['imserso_2021']:
-            puntaje += 1
-    elif solicitudes_df['imserso_anopasado'] and not solicitudes_df['imserso_2021']:
-            puntaje += 5
-    elif not solicitudes_df['imserso_anopasado'] and solicitudes_df['imserso_2021']:
-            puntaje += 10
-    else:
-            puntaje += 25
-
-    # Puntaje por pensión
-    if 480 <= solicitudes_df['importe_pension'] <= 996:
-        puntaje += 35
-    elif 997 <= solicitudes_df['importe_pension'] <= 1513:
-        puntaje += 20
-    elif 1514 <= solicitudes_df['importe_pension'] <= 2030:
-        puntaje += 10
-    elif 2031 <= solicitudes_df['importe_pension'] <= 2547:
-        puntaje += 5
-    elif solicitudes_df['importe_pension'] > 2548:
+    # Puntuación según la edad
+    if solicitudes_df['edad'] < 60:
         puntaje += 1
+    elif 60 <= solicitudes_df['edad'] <= 78:
+        puntaje += solicitudes_df['edad'] - 58
+    else:
+        puntaje += 20
+
+    # Puntuación por discapacidad
+    if solicitudes_df['discapacidad'] >= 33:
+        puntaje += 10
+
+    # Puntuación por situación económica
+    tramos_ingresos = [
+        (0, 484.61, 50),
+        (484.61, 900, 45),
+        (900, 1050, 40),
+        (1050, 1200, 35),
+        (1200, 1350, 30),
+        (1350, 1500, 25),
+        (1500, 1650, 20),
+        (1650, 1800, 15),
+        (1800, 1950, 10),
+        (1950, 2100, 5),
+        (2100, np.inf, 0)
+    ]
+    for tramo in tramos_ingresos:
+        if tramo[0] <= solicitudes_df['importe_pension'] <= tramo[1]:
+            puntaje += tramo[2]
+            break
+
+    # Puntuación por participación en años anteriores
+    if solicitudes_df['imserso_anopasado'] and solicitudes_df['imserso_2021']:
+        puntaje += 0
+    elif solicitudes_df['imserso_anopasado'] and not solicitudes_df['imserso_2021']:
+        puntaje += 5
+    elif not solicitudes_df['imserso_anopasado'] and solicitudes_df['imserso_2021']:
+        puntaje += 10
+    else:
+        puntaje += 25
 
     return puntaje
 
