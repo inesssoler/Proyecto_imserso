@@ -1,13 +1,21 @@
 # **Data Project 1**
 Este repositorio contiene toda la información del primer Data Project grupal del máster. El grupo está compuesto por Balma Agost, Borja Cabo, Javier Ruíz, Luis Segura e Inés Soler.
+El enlace al vídeo explicativo de Youtube es el siguiente: [ENLACE]()
 
+>## Índice
+- [Índice](#índice)
+- [Objetivos](#objetivos)
+- [Datos Utilizados](#datos-utilizados)
+- [Origen de los Datos](#origen-de-los-datos)
+- [Variables incluidas en el Sistema de Puntuaciones](#variables-incluidas-en-el-sistema-de-puntuaciones)
+- [Modelo de datos](#modelo-de-datos)
 
-># Objetivos
+>## Objetivos
 El objetivo principal del proyecto es modernizar y hacer más justo el proceso de asignación de las plazas de hoteles ofrecidas por el Imserso. 
 Para ello, hemos creado un sistema de puntuaciones basado en distintas variables que asignan mayor o menor preferencia a cada individuo a la hora de elegir plaza.
 
 
-># Datos Utilizados
+>## Datos Utilizados
 A continuación se pueden ver todos los datos que hemos utilizado y sus características.
 
 | TABLA | VARIABLE | DESCRIPCIÓN | TIPO DE DATO | 
@@ -70,7 +78,7 @@ Una vez definidos los putajes para cada solicitante, podemos crear otra tabla en
 | Asignaciones | hotel_asignado_2 | Nombre del segundo hotel que se le ha asignado al solicitante. | varchar(150) |
 
 
-># Origen de los Datos
+>## Origen de los Datos
 Los datos han sido creados mayoritariamente de forma aleatoria haciendo uso de la librería 'faker' y del módulo 'random' de Python.
 De los datos creados aleatoriamente, los siguientes han sido delimitados basándonos en información real:
 - La edad solo puede estar en el rango de 60 a 99 años.
@@ -83,7 +91,7 @@ Por otra parte, los datos referentes a los diferentes tipos de destino y las pos
 Y finalmente, hemos obtenido los datos de los hoteles que actualmente participan en el programa del IMSERSO: [Lista de Hoteles](https://www.preferente.com/noticias-de-hoteles/imserso-lista-completa-de-los-235-hoteles-de-mundiplan-y-turismo-social-321200.html)
 
 
-># Variables incluidas en el Sistema de Puntuaciones
+>## Variables incluidas en el Sistema de Puntuaciones
 Para el sistema de puntuaciones, se han seleccionado las variables más relevantes, bajo nuestro punto de vista, y a cada una se le ha asignado un puntaje dependiendo del valor que tome para cada solicitante.
 
 | VARIABLE | VALORES | PUNTOS | 
@@ -118,7 +126,7 @@ Para el sistema de puntuaciones, se han seleccionado las variables más relevant
 |                      | Ninguno | 25 puntos |
 
 
-># Modelo de datos
+>## Modelo de datos
 
 ![Esquema Relacional de las Tablas](esquema_relacional.png)
 
