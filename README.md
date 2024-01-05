@@ -128,7 +128,7 @@ Para el sistema de puntuaciones, se han seleccionado las variables más relevant
 
 >## Modelo de datos
 
-![Esquema Relacional de las Tablas](esquema_relacional.png)
+![Esquema Relacional de las Tablas](./Docs_presentacion/esquema_relacional.png)
 
 Este modelo refleja la estructura de las tablas y las relaciones entre ellas. La información se organiza de manera que puedes relacionar las preferencias con las ciudades, las ciudades con los destinos, y los hoteles con las ciudades. Además, las solicitudes están relacionadas con las preferencias. Cada tabla tiene una clave primaria única, y las claves foráneas se utilizan para establecer relaciones entre las tablas.
 
