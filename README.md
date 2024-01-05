@@ -1,6 +1,6 @@
 # **Data Project 1**
 Este repositorio contiene toda la información del primer Data Project grupal del máster. El grupo está compuesto por Balma Agost, Borja Cabo, Javier Ruíz, Luis Segura e Inés Soler.
-El enlace al vídeo explicativo de Youtube es el siguiente: [ENLACE]()
+El enlace al vídeo explicativo de Youtube es el siguiente: [ENLACE](https://youtu.be/il_1NI3e_xg)
 
 >## Índice
 - [Índice](#índice)
